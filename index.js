@@ -7,29 +7,27 @@ const port = 3000;
 
 app.use(express.json());
 
-let systemReady = false;
-
 mongoose.connect('mongodb://127.0.0.1:27017/usersDB')
 	.then(() => {
-		console.log("Connected To MongoDB.");
-		systemReady = true;
+		// --- SUCCESS ---
+		// Only run the server AFTER the DB is connected
+		console.log("✅ Connected To MongoDB.");
+
+		// Setup routes
+		app.use('/users', userRoutes);
+		app.get('/', (request, response) => {
+			response.send("Welcome To The System!");
+		});
+
+		// Start listening
+		app.listen(port, () => {
+			console.log(`🚀 Server works on: http://localhost:${port}`);
+			console.log(`View users on: http://localhost:${port}/users`);
+		});
+
 	})
 	.catch((error) => {
-		console.error('Error Connecting To MongoDB: ', error);
-		systemReady = false;
+		// --- FAILURE ---
+		console.error('❌ Error Connecting To MongoDB: ', error);
+		console.log("Server will not start due to database connection error.");
 	});
-
-if (systemReady = true) {
-	app.use('/users', userRoutes);
-
-	app.get('/', (request, response) => {
-		response.send("Welcome To The System!");
-	});
-
-	app.listen(port, () => {
-		console.log(`Server works on: http://localhost:${port}`);
-		console.log(`View users on: http://localhost:${port}/users`);
-	});
-} else {
-	console.log("The server encounters a problem right now, Try again later.");
-}
