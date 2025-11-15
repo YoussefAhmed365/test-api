@@ -1,28 +1,35 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const bookRoutes = require('./routes/bookRoutes');
+const userRoutes = require('./routes/userRoutes');
 
 const app = express();
 const port = 3000;
 
 app.use(express.json());
 
+let systemReady = false;
 
-mongoose.connect('mongodb://127.0.0.1:27017/libraryDB')
-  .then(() => {
-    console.log('Connected to MongoDB');
-  })
-  .catch((err) => {
-    console.error('Error connecting to MongoDB:', err.message);
-  });
+mongoose.connect('mongodb://127.0.0.1:27017/usersDB')
+	.then(() => {
+		console.log("Connected To MongoDB.");
+		systemReady = true;
+	})
+	.catch((error) => {
+		console.error('Error Connecting To MongoDB: ', error);
+		systemReady = false;
+	});
 
-app.use('/books', bookRoutes);
-// Main Path
-app.get('/', (req, res) => {
-  res.send('Welcome to the library!');
-});
+if (systemReady = true) {
+	app.use('/users', userRoutes);
 
-// Run Server
-app.listen(port, () => {
-  console.log(`Server works on http://localhost:${port}`);
-});
+	app.get('/', (request, response) => {
+		response.send("Welcome To The System!");
+	});
+
+	app.listen(port, () => {
+		console.log(`Server works on: http://localhost:${port}`);
+		console.log(`View users on: http://localhost:${port}/users`);
+	});
+} else {
+	console.log("The server encounters a problem right now, Try again later.");
+}
