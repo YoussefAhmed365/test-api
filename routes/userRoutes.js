@@ -1,15 +1,20 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/userModel');
+const bcrypt = require('bcrypt');
 
 router.post('/', async (request, response) => {
     try {
         const { name, username, password } = request.body;
 
+        // Hash the password before saving
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+
         const newUser = new User({
             name,
             username,
-            password
+            password: hashedPassword
         });
 
         const savedUser = await newUser.save();
@@ -18,9 +23,9 @@ router.post('/', async (request, response) => {
     } catch (error) {
         response.status(400).json({ message: error.message });
     }
-})
+});
 
-router.get('/', async (request, response) => {
+router.get('/', async (_request, response) => {
     try {
         const users = await User.find({});
 
@@ -28,14 +33,14 @@ router.get('/', async (request, response) => {
     } catch (error) {
         response.status(400).json({ message: error.message });
     }
-})
+});
 
 router.patch('/:id', async (request, response) => {
     try {
         const { id } = request.params;
         const updates = request.body;
 
-        const updatedUser = await User.findByIdAndUpdate(id, updates, { new: true });
+        const updatedUser = await User.findByIdAndUpdate(id, updates, { new: true, runValidators: true });
 
         if (!updatedUser) {
             return response.status(404).json({ message: 'User not found!' });
@@ -45,7 +50,7 @@ router.patch('/:id', async (request, response) => {
     } catch (error) {
         response.status(400).json({ message: error.message });
     }
-})
+});
 
 router.delete('/:id', async (request, response) => {
     try {
@@ -59,8 +64,8 @@ router.delete('/:id', async (request, response) => {
 
         response.json({ message: 'User deleted successfully!', user: deletedUser });
     } catch (error) {
-        response.status(500).json({ message: error.message });
+        response.status(400).json({ message: error.message });
     }
-})
+});
 
 module.exports = router;
